@@ -190,6 +190,7 @@ void loop(void)
   Serial.print(mag.magnetic.y);     Serial.print("\t");
   Serial.print(mag.magnetic.z);     Serial.print("\n");
 
+  //Found via testing. Likely to change but its a good starting point.
   float maxX = 0.29;
   float minX = -0.77;
   float maxY = 0.99;
