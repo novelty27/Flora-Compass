@@ -195,17 +195,16 @@ void loop(void)
 
 //   print out magnetometer data
 
-//  Serial.print("Magn. X: "); Serial.print(mag.magnetic.x);     Serial.print(" ");
-//  Serial.print("  \tY: ");   Serial.print(mag.magnetic.y);     Serial.print(" ");
-//  Serial.print("  \tZ: ");   Serial.print(mag.magnetic.z);     Serial.print("  \tgauss\n");
-  Serial.print(mag.magnetic.x);     Serial.print("\t");
-  Serial.print(mag.magnetic.y);     Serial.print("\t");
-  Serial.print(mag.magnetic.z);     Serial.print("\n");
+  Serial.print("Magn. X: "); Serial.print(mag.magnetic.x);     Serial.print(" ");
+  Serial.print("  \tY: ");   Serial.print(mag.magnetic.y);     Serial.print(" ");
+  Serial.print("  \tZ: ");   Serial.print(mag.magnetic.z);     Serial.print("  \tgauss\n");
+//  Serial.print(mag.magnetic.x);     Serial.print("\t");
+//  Serial.print(mag.magnetic.y);     Serial.print("\t");
+//  Serial.print(mag.magnetic.z);     Serial.print("\n");
 //  Serial.print("MaxX: "); Serial.print(maxX); Serial.print(" MinX: "); Serial.print(minX);
 //  Serial.print(" MaxY: "); Serial.print(maxY); Serial.print(" MinY: "); Serial.print(minY);
 //  Serial.print(" MaxZ: "); Serial.print(maxZ); Serial.print(" MinZ: "); Serial.print(minZ);
-//  
-//  
+//    
 //  Serial.print("\n\n\n\n\n");
 
   
@@ -216,16 +215,16 @@ void loop(void)
 //
 //  // print out temperature data
 //  Serial.print("Temp: "); Serial.print(temp.temperature); Serial.println(" *C");
-
-  float maxX = 0.29;
-  float minX = -0.77;
-  float midX = (maxX + minX)/2.0;
-  float maxY = 0.99;
-  float minY = -0.12;
-  float midY = (maxY + minY)/2.0;
-  float maxZ = 0.49;
-  float minZ = -0.52;
-  float midZ = (maxZ + minZ)/2.0;
+//
+//  float maxX = 0.29;
+//  float minX = -0.77;
+//  float midX = (maxX + minX)/2.0;
+//  float maxY = 0.99;
+//  float minY = -0.12;
+//  float midY = (maxY + minY)/2.0;
+//  float maxZ = 0.49;
+//  float minZ = -0.52;
+//  float midZ = (maxZ + minZ)/2.0;
 
   strip.setBrightness(10);
   
@@ -246,49 +245,49 @@ void loop(void)
   float zTolerance = abs(.1);
   
 
-//  //(x <= -.5) means the y axis is pointing up and x axis is parallel to the ground. The bottom of the chip is pointing NE
-//  if(isWithinTolerance(trueX, xTolerance, mag.magnetic.x)) {
-//    topRed = 255;
-//    bottomRed = 255;
-//  }
-//  else{
-//    topRed = 0;
-//    bottomRed = 0;      
-//  }
-//
-//  // (y >= .7) means the y axis in the east/west plane and x axis pointing north, bottom of chip pointing east
-//  if(isWithinTolerance(trueY, yTolerance, mag.magnetic.y)) {
-//    topGreen = 255;
-//    bottomGreen = 255;
-//  }
-//  else {
-//    topGreen = 0;
-//    bottomGreen = 0;      
-//  }
-//
-//  if(isWithinTolerance(trueZ, zTolerance, mag.magnetic.z)) {
-//    topBlue = 255;
-//    bottomBlue = 255;
-//  } 
-//  else {
-//    topBlue = 0;
-//    bottomBlue = 0;
-//  }
-//  
-//  
-//  uint32_t topColor = strip.Color(topRed, topGreen, topBlue);
-//  uint32_t bottomColor = strip.Color(bottomRed, bottomGreen, bottomBlue);
-//    
-//  for(int i = 0; i < 2*sizeof(topRing)/sizeof(topRing[0]); i++) {
-//    //need to apply color to top and bottom ring
-//    if(i < sizeof(topRing)/sizeof(topRing[0])){
-//      strip.setPixelColor(i, topColor);
-//    }
-//    else {
-//      strip.setPixelColor(i, bottomColor);
-//    }
-//  }
-  strip.setPixelColor(0, strip.Color(255,255,255));
+  //(x <= -.5) means the y axis is pointing up and x axis is parallel to the ground. The bottom of the chip is pointing NE
+  if(isWithinTolerance(trueX, xTolerance, mag.magnetic.x)) {
+    topRed = 255;
+    bottomRed = 255;
+  }
+  else{
+    topRed = 0;
+    bottomRed = 0;      
+  }
+
+  // (y >= .7) means the y axis in the east/west plane and x axis pointing north, bottom of chip pointing east
+  if(isWithinTolerance(trueY, yTolerance, mag.magnetic.y)) {
+    topGreen = 255;
+    bottomGreen = 255;
+  }
+  else {
+    topGreen = 0;
+    bottomGreen = 0;      
+  }
+
+  if(isWithinTolerance(trueZ, zTolerance, mag.magnetic.z)) {
+    topBlue = 255;
+    bottomBlue = 255;
+  } 
+  else {
+    topBlue = 0;
+    bottomBlue = 0;
+  }
+  
+  
+  uint32_t topColor = strip.Color(topRed, topGreen, topBlue);
+  uint32_t bottomColor = strip.Color(bottomRed, bottomGreen, bottomBlue);
+    
+  for(int i = 0; i < 2*sizeof(topRing)/sizeof(topRing[0]); i++) {
+    //need to apply color to top and bottom ring
+    if(i < sizeof(topRing)/sizeof(topRing[0])){
+      strip.setPixelColor(i, topColor);
+    }
+    else {
+      strip.setPixelColor(i, bottomColor);
+    }
+  }
+//  strip.setPixelColor(0, strip.Color(255,255,255));
   strip.show();
   delay(25);
 }
