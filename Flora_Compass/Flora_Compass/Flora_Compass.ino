@@ -1,3 +1,5 @@
+#include <Axis.h>
+
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_NeoPixel.h>
@@ -190,12 +192,18 @@ void loop(void)
   Serial.print(mag.magnetic.y);     Serial.print("\t");
   Serial.print(mag.magnetic.z);     Serial.print("\n");
 
-  float maxX = 0.29;
-  float minX = -0.77;
-  float maxY = 0.99;
-  float minY = -0.12;
-  float maxZ = 0.49;
-  float minZ = -0.52;
+  //Found via testing. Likely to change but its a good starting point.
+  Axis xAxis = Axis(0.29, -0.77,  0.00);
+  Axis yAxis = Axis(0.99, -0.12,  0.45);
+  Axis zAxis = Axis(0.49, -0.52, -0.52);
+  Serial.print("Y Max: "); Serial.print(yAxis.max);
+  Serial.print("\tY Min: "); Serial.print(yAxis.min);
+  Serial.print("\tY Target: "); Serial.print(yAxis.target);
+  Serial.print("\tY Scale: "); Serial.print(yAxis.scale);
+  Serial.print("\tY Offset: "); Serial.print(yAxis.offset);
+  Serial.print("\n");
+  Serial.print(yAxis.scale_value(mag.magnetic.y)); Serial.print("\n");
+  
 
   strip.setBrightness(10);
   
