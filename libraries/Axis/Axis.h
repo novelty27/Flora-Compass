@@ -1,3 +1,5 @@
+#include <Adafruit_Sensor.h>
+
 class Axis {
 	private:
 		float original_min, original_max, original_target;
@@ -10,7 +12,7 @@ class Axis {
 	public:
 		float min, max, target;
 		float scale, offset;
-		
+
 		Axis(float min_value,  float max_value, float target_value);
 		float scale_value(float value);
 };

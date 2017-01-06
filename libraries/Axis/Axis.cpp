@@ -1,6 +1,7 @@
 #include "Axis.h"
 #include <math.h>
 
+
 // Axis Constructor
 Axis::Axis(float min_value,  float max_value, float target_value)
 {
