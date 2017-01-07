@@ -195,13 +195,13 @@ void loop(void)
   Axis xAxis = Axis(0.29, -0.77,  0.00);
   Axis yAxis = Axis(0.99, -0.12,  0.45);
   Axis zAxis = Axis(0.49, -0.52, -0.52);
-
-  Serial.print("Y Max: "); Serial.print(yAxis.max);
-  Serial.print("\tY Min: "); Serial.print(yAxis.min);
-  Serial.print("\tY Target: "); Serial.print(yAxis.target);
-  Serial.print("\tY Scale: "); Serial.print(yAxis.scale);
-  Serial.print("\tY Offset: "); Serial.print(yAxis.offset);
-  Serial.print("\n");
+//
+//  Serial.print("Y Max: "); Serial.print(yAxis.max);
+//  Serial.print("\tY Min: "); Serial.print(yAxis.min);
+//  Serial.print("\tY Target: "); Serial.print(yAxis.target);
+//  Serial.print("\tY Scale: "); Serial.print(yAxis.scale);
+//  Serial.print("\tY Offset: "); Serial.print(yAxis.offset);
+//  Serial.print("\n");
   Serial.print(yAxis.scale_value(mag.magnetic.y)); Serial.print("\n");
   
 
@@ -226,15 +226,6 @@ void loop(void)
 bool isWithinTolerance(float target, float tolerance, float value) {
   return ((value <= target+tolerance) && (value >= target-tolerance));
 }
-
-//float axisValue(Axis axis)
-//{
-//  if (axis)
-//  {
-//    
-//  }
-//  return 0.0;
-//}
 
 
 void setStripColor(uint32_t c, uint8_t wait) {

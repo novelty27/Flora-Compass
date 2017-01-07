@@ -21,7 +21,7 @@ void Axis::set_values (float min_value, float max_value, float target_value)
 void Axis::find_scale()
 {
 	float range = fabs(original_max) + fabs(original_min);
-	scale = 1.0/range;
+	scale = 2.0/range;
 }
 
 void Axis::find_offset()
@@ -32,7 +32,7 @@ void Axis::find_offset()
 void Axis::set_scaled_values()
 {
 	max = 1.0;
-	min = 0.0;
+	min = -1.0;
 	target = scale_value(original_target);
 }
 
