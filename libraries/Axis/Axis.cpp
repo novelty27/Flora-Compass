@@ -26,7 +26,7 @@ void Axis::find_scale()
 
 void Axis::find_offset()
 {
-	offset = 1.0-(scale * max);
+	offset = 1.0 - (scale * original_max);
 }
 
 void Axis::set_scaled_values()

@@ -1,4 +1,5 @@
 #include <Axis.h>
+#include <math.h>
 
 #include <SPI.h>
 #include <Wire.h>
@@ -188,21 +189,41 @@ void loop(void)
   lsm.getEvent(0, &mag, 0, 0); 
   
 //   print out magnetometer data
-  Serial.print(mag.magnetic.x);     Serial.print("\t");
-  Serial.print(mag.magnetic.y);     Serial.print("\t");
-  Serial.print(mag.magnetic.z);     Serial.print("\n");
+//  Serial.print(mag.magnetic.x);     Serial.print("\t");
+//  Serial.print(mag.magnetic.y);     Serial.print("\t");
+//  Serial.print(mag.magnetic.z);     Serial.print("\n");
   
-  Axis xAxis = Axis(0.29, -0.77,  0.00);
-  Axis yAxis = Axis(0.99, -0.12,  0.45);
-  Axis zAxis = Axis(0.49, -0.52, -0.52);
-//
-//  Serial.print("Y Max: "); Serial.print(yAxis.max);
-//  Serial.print("\tY Min: "); Serial.print(yAxis.min);
-//  Serial.print("\tY Target: "); Serial.print(yAxis.target);
-//  Serial.print("\tY Scale: "); Serial.print(yAxis.scale);
-//  Serial.print("\tY Offset: "); Serial.print(yAxis.offset);
+  Axis xAxis = Axis(-0.77, 0.29, 0.00);
+  Axis yAxis = Axis(-0.12 ,0.99, 0.45);
+  Axis zAxis = Axis(-0.52, 0.49, -0.41);
+
+  float range = fabs(.99) + fabs(-.12);
+  float scale = 2.0/range;
+  float offset = 1.0-(scale * .99);
+
+  Serial.print("Range: "); Serial.print(range);
+  Serial.print(" Scale: ");Serial.print(scale);
+  Serial.print(" Offset: ");Serial.print(offset);Serial.print("\n");
+
+  Serial.print("Y Max: "); Serial.print(yAxis.max);
+  Serial.print("\tY Min: "); Serial.print(yAxis.min);
+  Serial.print("\tY Target: "); Serial.print(yAxis.target);
+  Serial.print("\tY Scale: "); Serial.print(yAxis.scale);
+  Serial.print("\tY Offset: "); Serial.print(yAxis.offset);
+  Serial.print(yAxis.original_max);
+  Serial.print("\n");
+
+//  Serial.print("X Max: "); Serial.print(xAxis.max);
+//  Serial.print("\tX Min: "); Serial.print(xAxis.min);
+//  Serial.print("\tX Target: "); Serial.print(xAxis.target);
+//  Serial.print("\tX Scale: "); Serial.print(xAxis.scale);
+//  Serial.print("\tX Offset: "); Serial.print(xAxis.offset);
 //  Serial.print("\n");
-  Serial.print(yAxis.scale_value(mag.magnetic.y)); Serial.print("\n");
+
+//  Serial.print(yAxis.scale_value(mag.magnetic.y)); Serial.print(" ");Serial.print(mag.magnetic.x); Serial.print(" ");Serial.print(xAxis.scale_value(mag.magnetic.x)); Serial.print(" ");
+//  Serial.print((atan2(yAxis.scale_value(mag.magnetic.y), xAxis.scale_value(mag.magnetic.x)))*(180.0/3.141)); Serial.print(" ");
+//  Serial.print(int((atan2(yAxis.scale_value(mag.magnetic.y), xAxis.scale_value(mag.magnetic.x)))*(180.0/3.141))/(16));Serial.print(" ");
+//  Serial.print("\n");
   
 
   strip.setBrightness(10);
@@ -220,7 +241,8 @@ void loop(void)
 
   strip.setPixelColor(0, strip.Color(255,255,255));
   strip.show();
-  delay(25);
+  //delay(25);
+  delay(500);
 }
 
 bool isWithinTolerance(float target, float tolerance, float value) {
