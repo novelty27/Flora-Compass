@@ -227,10 +227,12 @@ void loop(void)
   int topBlue = 0;
   int bottomBlue = 0;
 
-  int targetPixel = int((atan2(yAxis.scale_value(mag.magnetic.y), xAxis.scale_value(mag.magnetic.x)))*(180.0/3.141))/(21) + 8;
-  Serial.print("Target Pixel: "); Serial.print(targetPixel); 
-  Serial.print(" Top pixel: "); Serial.print(topRing[targetPixel]); 
-  Serial.print(" Bottom Pixel: "); Serial.print(bottomRing[targetPixel]); 
+  int targetPixel = floor((atan2(yAxis.scale_value(mag.magnetic.y), xAxis.scale_value(mag.magnetic.x))*(180.0/3.141))/22.5) + 8;
+  Serial.print("Angle: "); Serial.print(int((atan2(yAxis.scale_value(mag.magnetic.y), xAxis.scale_value(mag.magnetic.x)))*(180.0/3.141)));
+  Serial.print(" Light: "); Serial.print(targetPixel);
+//  Serial.print("Target Pixel: "); Serial.print(targetPixel); 
+//  Serial.print(" Top pixel: "); Serial.print(topRing[targetPixel]); 
+//  Serial.print(" Bottom Pixel: "); Serial.print(bottomRing[targetPixel]); 
   Serial.print("\n");
 
   
@@ -238,6 +240,10 @@ void loop(void)
   uint32_t bottomColor = strip.Color(bottomRed, bottomGreen, bottomBlue);
 
   setStripColor(strip.Color(0,0,0),0);
+//  strip.setPixelColor(topRing[0], strip.Color(255,255,255));
+//  strip.setPixelColor(topRing[3], strip.Color(255,0,0));
+//  strip.setPixelColor(topRing[7], strip.Color(0,255,0));
+//  strip.setPixelColor(topRing[11], strip.Color(0,0,255));
   strip.setPixelColor(topRing[targetPixel], strip.Color(255,255,255));
   strip.setPixelColor(bottomRing[targetPixel], strip.Color(255,255,255));
   strip.show();
