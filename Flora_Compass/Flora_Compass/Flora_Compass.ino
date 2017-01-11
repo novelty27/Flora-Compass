@@ -180,42 +180,17 @@ void setup(void)
 /**************************************************************************/
 void loop(void) 
 {  
-  int topRing[16]    = { 14, 13, 12, 11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1,  0, 15 };
-  int bottomRing[16] = { 30, 31, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29 };
+  int topRing[16]    = {  6,  5,  4,  3,  2,  1,  0, 15, 14, 13, 12, 11, 10,  9,  8,  7 };
+  int bottomRing[16] = { 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 16, 17, 18, 19, 20, 21 };
 
   /* Get a new sensor event */ 
   sensors_event_t accel, mag, gyro, temp;
   
   lsm.getEvent(0, &mag, 0, 0); 
-  
-//   print out magnetometer data
-//  Serial.print(mag.magnetic.x);     Serial.print("\t");
-//  Serial.print(mag.magnetic.y);     Serial.print("\t");
-//  Serial.print(mag.magnetic.z);     Serial.print("\n");
-  
+ 
   Axis xAxis = Axis(-0.77, 0.29, 0.00);
   Axis yAxis = Axis(-0.12 ,0.99, 0.45);
   Axis zAxis = Axis(-0.52, 0.49, -0.41);
-//
-//  Serial.print("Y Max: "); Serial.print(yAxis.max);
-//  Serial.print("\tY Min: "); Serial.print(yAxis.min);
-//  Serial.print("\tY Target: "); Serial.print(yAxis.target);
-//  Serial.print("\tY Scale: "); Serial.print(yAxis.scale);
-//  Serial.print("\tY Offset: "); Serial.print(yAxis.offset);
-//  Serial.print("\n");
-
-//  Serial.print("X Max: "); Serial.print(xAxis.max);
-//  Serial.print("\tX Min: "); Serial.print(xAxis.min);
-//  Serial.print("\tX Target: "); Serial.print(xAxis.target);
-//  Serial.print("\tX Scale: "); Serial.print(xAxis.scale);
-//  Serial.print("\tX Offset: "); Serial.print(xAxis.offset);
-//  Serial.print("\n");
-
-//  Serial.print(yAxis.scale_value(mag.magnetic.y)); Serial.print(" ");Serial.print(mag.magnetic.x); Serial.print(" ");Serial.print(xAxis.scale_value(mag.magnetic.x)); Serial.print(" ");
-//  Serial.print((atan2(yAxis.scale_value(mag.magnetic.y), xAxis.scale_value(mag.magnetic.x)))*(180.0/3.141)); Serial.print(" ");
-//  Serial.print(int((atan2(yAxis.scale_value(mag.magnetic.y), xAxis.scale_value(mag.magnetic.x)))*(180.0/3.141))/(20));Serial.print(" ");
-//  Serial.print("\n");
-  
 
   strip.setBrightness(10);
   
@@ -227,12 +202,16 @@ void loop(void)
   int topBlue = 0;
   int bottomBlue = 0;
 
-  int targetPixel = floor((atan2(yAxis.scale_value(mag.magnetic.y), xAxis.scale_value(mag.magnetic.x))*(180.0/3.141))/22.5) + 8;
-  Serial.print("Angle: "); Serial.print(int((atan2(yAxis.scale_value(mag.magnetic.y), xAxis.scale_value(mag.magnetic.x)))*(180.0/3.141)));
-  Serial.print(" Light: "); Serial.print(targetPixel);
-//  Serial.print("Target Pixel: "); Serial.print(targetPixel); 
-//  Serial.print(" Top pixel: "); Serial.print(topRing[targetPixel]); 
-//  Serial.print(" Bottom Pixel: "); Serial.print(bottomRing[targetPixel]); 
+  float anglePerLight = 360.0/(sizeof(topRing)/sizeof(*topRing));
+
+  //Take the arc tangent of the scaled x and y components which will return radians. Then convert the radians to degrees. 
+  //Then divide that by the angle allocated to each light. That will give you a number betweer -8 and 7. Add 8 to scale that to a base zero system.
+  int targetPixel = floor((atan2(yAxis.scale_value(mag.magnetic.y), xAxis.scale_value(mag.magnetic.x))*(180.0/3.141))/anglePerLight) + 8;
+  
+  Serial.print("Angle: "); Serial.print(floor((atan2(yAxis.scale_value(mag.magnetic.y), xAxis.scale_value(mag.magnetic.x))*(180.0/3.141))));
+  Serial.print(" Target Pixel: "); Serial.print(targetPixel); 
+  Serial.print(" Top pixel: "); Serial.print(topRing[targetPixel]); 
+  Serial.print(" Bottom Pixel: "); Serial.print(bottomRing[targetPixel]); 
   Serial.print("\n");
 
   
@@ -240,10 +219,6 @@ void loop(void)
   uint32_t bottomColor = strip.Color(bottomRed, bottomGreen, bottomBlue);
 
   setStripColor(strip.Color(0,0,0),0);
-//  strip.setPixelColor(topRing[0], strip.Color(255,255,255));
-//  strip.setPixelColor(topRing[3], strip.Color(255,0,0));
-//  strip.setPixelColor(topRing[7], strip.Color(0,255,0));
-//  strip.setPixelColor(topRing[11], strip.Color(0,0,255));
   strip.setPixelColor(topRing[targetPixel], strip.Color(255,255,255));
   strip.setPixelColor(bottomRing[targetPixel], strip.Color(255,255,255));
   strip.show();
