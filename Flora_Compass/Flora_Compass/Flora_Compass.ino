@@ -193,21 +193,11 @@ void loop(void)
 {  
   /* Get a new sensor event */ 
   sensors_event_t accel, mag, gyro, temp;
-  
   lsm.getEvent(0, &mag, 0, 0);
 
   strip.setBrightness(10);
-  
-  int topRed = 0;
-  int bottomRed = 0;
-  int topGreen = 0;
-  
-  int bottomGreen = 0;
-  int topBlue = 0;
-  int bottomBlue = 0;
-
-  pointNorth(mag);
-//  rainbowCycle();
+//  pointNorth(mag);
+  rainbowCycle(mag);
   
   delay(50);
 }
@@ -225,13 +215,10 @@ void setStripColor(uint32_t c, uint8_t wait) {
   strip.show();
 }
 
+//Points North with two white pixels
 void pointNorth(sensors_event_t mag)
 {
-   float anglePerLight = 360.0/ringLength;
-
-  //Take the arc tangent of the scaled x and y components which will return radians. Then convert the radians to degrees. 
-  //Then divide that by the angle allocated to each light. That will give you a number betweer -8 and 7. Add 8 to scale that to a base zero system.
-  float rawPixel = ((atan2(yAxis.scale_value(mag.magnetic.y), xAxis.scale_value(mag.magnetic.x))*(180.0/3.141))/anglePerLight) + 8;
+  float rawPixel = findNorthPixel(mag);
   int targetPixel = floor(rawPixel);
   int secondPixel = getSecondPixel(rawPixel);
   
@@ -248,6 +235,16 @@ void pointNorth(sensors_event_t mag)
   strip.setPixelColor(bottomRing[secondPixel], strip.Color(255,255,255));
 
   strip.show();
+}
+
+float findNorthPixel(sensors_event_t mag)
+{
+  float anglePerLight = 360.0/ringLength;
+
+  //Take the arc tangent of the scaled x and y components which will return radians. Then convert the radians to degrees. 
+  //Then divide that by the angle allocated to each light. That will give you a number betweer -8 and 7. Add 8 to scale that to a base zero system.
+  float rawPixel = ((atan2(yAxis.scale_value(mag.magnetic.y), xAxis.scale_value(mag.magnetic.x))*(180.0/3.141))/anglePerLight) + 8;
+  return rawPixel;
 }
 
 int getSecondPixel(float rawPixel)
@@ -269,27 +266,21 @@ int getSecondPixel(float rawPixel)
   return secondPixel;
 }
 
-// Slightly different, this makes the rainbow equally distributed throughout
-void rainbowCycle() {
-  uint16_t i;
-  for(i=0; i< strip.numPixels(); i++) {
-    strip.setPixelColor(i, Wheel((i * 256 / strip.numPixels()) & 255));
-  }
-}
+// Displays a rainbow on the top and bottom ring.
+// Will cycle and keep the red portion pointing north.
+// Taken from Adadfruit and modified.
+void rainbowCycle(sensors_event_t mag) {
 
-// From Adafruit - Modified
-// Slightly different, this makes the rainbow equally distributed throughout
-//void rainbowCycle(uint8_t wait) {
-//  uint16_t i, j;
-//
-//  for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
-//    for(i=0; i< strip.numPixels(); i++) {
-//      strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
-//    }
-//    strip.show();
-//    delay(wait);
-//  }
-//}
+  int targetPixel = floor(findNorthPixel(mag));
+  
+  setStripColor(strip.Color(0,0,0),0);
+  uint16_t i;
+  for(i=0; i< ringLength; i++) {
+    strip.setPixelColor(topRing[(i + targetPixel) % ringLength], Wheel((i * 256 / ringLength) & 255));
+    strip.setPixelColor(bottomRing[(i + targetPixel) % ringLength], Wheel((i * 256 / ringLength) & 255));
+  }
+  strip.show();
+}
 
 // From Adafruit
 // Input a value 0 to 255 to get a color value.
