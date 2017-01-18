@@ -60,6 +60,16 @@ Adafruit_LSM9DS0 lsm = Adafruit_LSM9DS0(1000);  // Use I2C, ID #1000
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(32, 6, NEO_GRB + NEO_KHZ800);
 
+// Customizes the lights on the rings into an order that is more logical for this program
+int topRing[16]    = {  6,  5,  4,  3,  2,  1,  0, 15, 14, 13, 12, 11, 10,  9,  8,  7 };
+int bottomRing[16] = { 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 16, 17, 18, 19, 20, 21 };
+int ringLength = sizeof(topRing)/sizeof(*topRing);
+
+Axis xAxis = Axis(-0.77, 0.29, 0.00);
+Axis yAxis = Axis(-0.12 ,0.99, 0.45);
+Axis zAxis = Axis(-0.52, 0.49, -0.41);
+
+
 /**************************************************************************/
 /*
     Displays some basic information on this sensor from the unified
@@ -178,19 +188,13 @@ void setup(void)
     should go here)
 */
 /**************************************************************************/
+
 void loop(void) 
 {  
-  int topRing[16]    = {  6,  5,  4,  3,  2,  1,  0, 15, 14, 13, 12, 11, 10,  9,  8,  7 };
-  int bottomRing[16] = { 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 16, 17, 18, 19, 20, 21 };
-
   /* Get a new sensor event */ 
   sensors_event_t accel, mag, gyro, temp;
   
-  lsm.getEvent(0, &mag, 0, 0); 
- 
-  Axis xAxis = Axis(-0.77, 0.29, 0.00);
-  Axis yAxis = Axis(-0.12 ,0.99, 0.45);
-  Axis zAxis = Axis(-0.52, 0.49, -0.41);
+  lsm.getEvent(0, &mag, 0, 0);
 
   strip.setBrightness(10);
   
@@ -202,27 +206,10 @@ void loop(void)
   int topBlue = 0;
   int bottomBlue = 0;
 
-  float anglePerLight = 360.0/(sizeof(topRing)/sizeof(*topRing));
-
-  //Take the arc tangent of the scaled x and y components which will return radians. Then convert the radians to degrees. 
-  //Then divide that by the angle allocated to each light. That will give you a number betweer -8 and 7. Add 8 to scale that to a base zero system.
-  int targetPixel = floor((atan2(yAxis.scale_value(mag.magnetic.y), xAxis.scale_value(mag.magnetic.x))*(180.0/3.141))/anglePerLight) + 8;
+  pointNorth(mag);
+//  rainbowCycle();
   
-  Serial.print("Angle: "); Serial.print(floor((atan2(yAxis.scale_value(mag.magnetic.y), xAxis.scale_value(mag.magnetic.x))*(180.0/3.141))));
-  Serial.print(" Target Pixel: "); Serial.print(targetPixel); 
-  Serial.print(" Top pixel: "); Serial.print(topRing[targetPixel]); 
-  Serial.print(" Bottom Pixel: "); Serial.print(bottomRing[targetPixel]); 
-  Serial.print("\n");
-
-  
-  uint32_t topColor = strip.Color(topRed, topGreen, topBlue);
-  uint32_t bottomColor = strip.Color(bottomRed, bottomGreen, bottomBlue);
-
-  setStripColor(strip.Color(0,0,0),0);
-  strip.setPixelColor(topRing[targetPixel], strip.Color(255,255,255));
-  strip.setPixelColor(bottomRing[targetPixel], strip.Color(255,255,255));
-  strip.show();
-  delay(25);
+  delay(50);
 }
 
 bool isWithinTolerance(float target, float tolerance, float value) {
@@ -236,6 +223,88 @@ void setStripColor(uint32_t c, uint8_t wait) {
     delay(wait);
   }
   strip.show();
+}
+
+void pointNorth(sensors_event_t mag)
+{
+   float anglePerLight = 360.0/ringLength;
+
+  //Take the arc tangent of the scaled x and y components which will return radians. Then convert the radians to degrees. 
+  //Then divide that by the angle allocated to each light. That will give you a number betweer -8 and 7. Add 8 to scale that to a base zero system.
+  float rawPixel = ((atan2(yAxis.scale_value(mag.magnetic.y), xAxis.scale_value(mag.magnetic.x))*(180.0/3.141))/anglePerLight) + 8;
+  int targetPixel = floor(rawPixel);
+  int secondPixel = getSecondPixel(rawPixel);
+  
+  Serial.print("Angle: "); Serial.print(floor((atan2(yAxis.scale_value(mag.magnetic.y), xAxis.scale_value(mag.magnetic.x))*(180.0/3.141))));
+  Serial.print(" Target Pixel: "); Serial.print(targetPixel); 
+  Serial.print(" Top pixel: "); Serial.print(topRing[targetPixel]); 
+  Serial.print(" Bottom Pixel: "); Serial.print(bottomRing[targetPixel]); 
+  Serial.print("\n");
+
+  setStripColor(strip.Color(0,0,0),0);
+  strip.setPixelColor(topRing[targetPixel], strip.Color(255,255,255));
+  strip.setPixelColor(topRing[secondPixel], strip.Color(255,255,255));
+  strip.setPixelColor(bottomRing[targetPixel], strip.Color(255,255,255));
+  strip.setPixelColor(bottomRing[secondPixel], strip.Color(255,255,255));
+
+  strip.show();
+}
+
+int getSecondPixel(float rawPixel)
+{
+  float pixelRemainder = fmod(rawPixel, 1.0);
+  int targetPixel = floor(rawPixel);
+  int secondPixel;
+  if(pixelRemainder >= 0.5 && targetPixel < ringLength - 1)
+    secondPixel = targetPixel + 1;
+  else if(pixelRemainder >= 0.5 && targetPixel == ringLength - 1)
+    secondPixel = 0;
+  else if(pixelRemainder < 0.5 && targetPixel != 0)
+    secondPixel = targetPixel - 1;
+  else if(pixelRemainder < 0.5 && targetPixel == 0)
+    secondPixel = ringLength - 1;
+  else
+    secondPixel = 0;
+
+  return secondPixel;
+}
+
+// Slightly different, this makes the rainbow equally distributed throughout
+void rainbowCycle() {
+  uint16_t i;
+  for(i=0; i< strip.numPixels(); i++) {
+    strip.setPixelColor(i, Wheel((i * 256 / strip.numPixels()) & 255));
+  }
+}
+
+// From Adafruit - Modified
+// Slightly different, this makes the rainbow equally distributed throughout
+//void rainbowCycle(uint8_t wait) {
+//  uint16_t i, j;
+//
+//  for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
+//    for(i=0; i< strip.numPixels(); i++) {
+//      strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
+//    }
+//    strip.show();
+//    delay(wait);
+//  }
+//}
+
+// From Adafruit
+// Input a value 0 to 255 to get a color value.
+// The colours are a transition r - g - b - back to r.
+uint32_t Wheel(byte WheelPos) {
+  WheelPos = 255 - WheelPos;
+  if(WheelPos < 85) {
+    return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  }
+  if(WheelPos < 170) {
+    WheelPos -= 85;
+    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
+  WheelPos -= 170;
+  return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
 
 
