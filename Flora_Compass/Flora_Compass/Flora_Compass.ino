@@ -242,11 +242,8 @@ void smoothPointNorth(sensors_event_t mag)
 //trueNorth = 10.5, targetPixel = 9, brightnessValue = 128)
 int brightnessValue(float trueNorth, int targetPixel)
 {
-  float diffFromTrueNorth = fmod(fabs(1.0*targetPixel - trueNorth), ringLength);
-  if (targetPixel == 15)
-  {
-    Serial.print("Difference from true north: "); Serial.print(diffFromTrueNorth); Serial.print("\n");
-  }
+  float diffFromTrueNorth = min(fabs(1.0*targetPixel - trueNorth), fabs(1.0*targetPixel - (trueNorth - (ringLength))));
+  Serial.print("Pixel: "); Serial.print(targetPixel); Serial.print(" diff: "); Serial.print(diffFromTrueNorth); Serial.print("\n");
   float brightnessValue = -1.0*fabs(-255.0*(diffFromTrueNorth-0.5))+255.0;
   
   if (brightnessValue < 0)
