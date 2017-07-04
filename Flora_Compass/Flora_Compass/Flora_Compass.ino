@@ -197,13 +197,12 @@ void loop(void)
 
 //  Serial.print("Mag Value: "); Serial.print(&mag); Serial.print(" \n");
 //  Serial.print("Mag Value: "); Serial.print(mag.magnetic); Serial.print(" \n");
-  Serial.print("Mag Value: "); Serial.print(mag.magnetic.y); Serial.print(" \n\n");
+//  Serial.print("Mag Value: "); Serial.print(mag.magnetic.y); Serial.print(" \n\n");
 
   strip.setBrightness(50);
-  pointNorth(mag);
+//  pointNorth(mag);
 //  rainbowCycle(mag);
-//  rainbowCycle(20);
-  
+  smoothPointNorth(mag);
   delay(50);
 }
 
@@ -218,6 +217,40 @@ void setStripColor(uint32_t c, uint8_t wait) {
     delay(wait);
   }
   strip.show();
+}
+
+// Points North with a number of pixels with a gradient instead of turning pixels on/off
+void smoothPointNorth(sensors_event_t mag)
+{
+  setStripColor(strip.Color(0,0,0),0);
+
+  float trueNorth = findNorthPixel(mag);
+  for (int i = 0; i < ringLength; i++)
+  {
+    int bv = brightnessValue(trueNorth, i);
+    Serial.print(i); Serial.print(": "); Serial.print(bv); Serial.print("\n");
+    strip.setPixelColor(topRing[i], strip.Color(bv, bv, bv));
+  }
+}
+
+
+
+//Uses math to determine the brightness value (0 - 255) for a pixel given how far away it is from true North
+//0.5 is the center of a pixel 
+//There are 255*2 brightness points to distribute
+//Example Set:
+//trueNorth = 10.5, targetPixel = 10, brightnessValue = 255)
+//trueNorth = 10.5, targetPixel = 11, brightnessValue = 128)
+//trueNorth = 10.5, targetPixel = 9, brightnessValue = 128)
+int brightnessValue(float trueNorth, int targetPixel)
+{
+  float diffFromTrueNorth = fabs(1.0*targetPixel - trueNorth);
+  float brightnessValue = -1.0*fabs(-255.0*(diffFromTrueNorth-0.5))+255.0;
+  
+  if (brightnessValue < 0)
+    brightnessValue = 0;
+     
+  return floor(brightnessValue);  
 }
 
 //Points North with two white pixels
