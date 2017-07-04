@@ -195,9 +195,14 @@ void loop(void)
   sensors_event_t accel, mag, gyro, temp;
   lsm.getEvent(0, &mag, 0, 0);
 
-  strip.setBrightness(10);
-//  pointNorth(mag);
-  rainbowCycle(mag);
+//  Serial.print("Mag Value: "); Serial.print(&mag); Serial.print(" \n");
+//  Serial.print("Mag Value: "); Serial.print(mag.magnetic); Serial.print(" \n");
+  Serial.print("Mag Value: "); Serial.print(mag.magnetic.y); Serial.print(" \n\n");
+
+  strip.setBrightness(50);
+  pointNorth(mag);
+//  rainbowCycle(mag);
+//  rainbowCycle(20);
   
   delay(50);
 }
@@ -280,6 +285,19 @@ void rainbowCycle(sensors_event_t mag) {
     strip.setPixelColor(bottomRing[(i + targetPixel) % ringLength], Wheel((i * 256 / ringLength) & 255));
   }
   strip.show();
+}
+
+void rainbowCycle(uint8_t wait) {
+  uint16_t i, j;
+
+  for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
+    for(i=0; i< ringLength; i++) {
+          strip.setPixelColor(topRing[i], Wheel((i * 256 / ringLength) & 255));
+    strip.setPixelColor(bottomRing[i], Wheel((i * 256 / ringLength) & 255));
+    }
+    strip.show();
+    delay(wait);
+  }
 }
 
 // From Adafruit
