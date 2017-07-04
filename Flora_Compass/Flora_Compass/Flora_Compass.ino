@@ -199,17 +199,11 @@ void loop(void)
 //  Serial.print("Mag Value: "); Serial.print(mag.magnetic); Serial.print(" \n");
 //  Serial.print("Mag Value: "); Serial.print(mag.magnetic.y); Serial.print(" \n\n");
 
-  strip.setBrightness(25);
-//  pointNorth(mag);
+  strip.setBrightness(50);
 //  rainbowCycle(mag);
-  smoothPointNorth(mag);
+  pointNorth(mag);
   delay(50);
 }
-
-bool isWithinTolerance(float target, float tolerance, float value) {
-  return ((value <= target+tolerance) && (value >= target-tolerance));
-}
-
 
 void setStripColor(uint32_t c, uint8_t wait) {
   for(uint16_t i=0; i<strip.numPixels(); i++) {
@@ -219,8 +213,8 @@ void setStripColor(uint32_t c, uint8_t wait) {
   strip.show();
 }
 
-// Points North with a number of pixels with a gradient instead of turning pixels on/off
-void smoothPointNorth(sensors_event_t mag)
+// Points North with a number of pixels with a gradient, slowly turning pixels on and off
+void pointNorth(sensors_event_t mag)
 {
   float trueNorth = findNorthPixel(mag);
   for (int i = 0; i < ringLength; i++)
@@ -243,7 +237,6 @@ void smoothPointNorth(sensors_event_t mag)
 int brightnessValue(float trueNorth, int targetPixel)
 {
   float diffFromTrueNorth = min(fabs(1.0*targetPixel - trueNorth), fabs(1.0*targetPixel - (trueNorth - (ringLength))));
-  Serial.print("Pixel: "); Serial.print(targetPixel); Serial.print(" diff: "); Serial.print(diffFromTrueNorth); Serial.print("\n");
   float brightnessValue = -1.0*fabs(-255.0*(diffFromTrueNorth-0.5))+255.0;
   
   if (brightnessValue < 0)
@@ -252,27 +245,6 @@ int brightnessValue(float trueNorth, int targetPixel)
   return floor(brightnessValue);  
 }
 
-//Points North with two white pixels
-void pointNorth(sensors_event_t mag)
-{
-  float rawPixel = findNorthPixel(mag);
-  int targetPixel = floor(rawPixel);
-  int secondPixel = getSecondPixel(rawPixel);
-  
-  Serial.print("Angle: "); Serial.print(floor((atan2(yAxis.scale_value(mag.magnetic.y), xAxis.scale_value(mag.magnetic.x))*(180.0/3.141))));
-  Serial.print(" Target Pixel: "); Serial.print(targetPixel); 
-  Serial.print(" Top pixel: "); Serial.print(topRing[targetPixel]); 
-  Serial.print(" Bottom Pixel: "); Serial.print(bottomRing[targetPixel]); 
-  Serial.print("\n");
-
-  setStripColor(strip.Color(0,0,0),0);
-  strip.setPixelColor(topRing[targetPixel], strip.Color(255,255,255));
-  strip.setPixelColor(topRing[secondPixel], strip.Color(255,255,255));
-  strip.setPixelColor(bottomRing[targetPixel], strip.Color(255,255,255));
-  strip.setPixelColor(bottomRing[secondPixel], strip.Color(255,255,255));
-
-  strip.show();
-}
 
 float findNorthPixel(sensors_event_t mag)
 {
@@ -282,25 +254,6 @@ float findNorthPixel(sensors_event_t mag)
   //Then divide that by the angle allocated to each light. That will give you a number betweer -8 and 7. Add 8 to scale that to a base zero system.
   float rawPixel = ((atan2(yAxis.scale_value(mag.magnetic.y), xAxis.scale_value(mag.magnetic.x))*(180.0/3.141))/anglePerLight) + 8;
   return rawPixel;
-}
-
-int getSecondPixel(float rawPixel)
-{
-  float pixelRemainder = fmod(rawPixel, 1.0);
-  int targetPixel = floor(rawPixel);
-  int secondPixel;
-  if(pixelRemainder >= 0.5 && targetPixel < ringLength - 1)
-    secondPixel = targetPixel + 1;
-  else if(pixelRemainder >= 0.5 && targetPixel == ringLength - 1)
-    secondPixel = 0;
-  else if(pixelRemainder < 0.5 && targetPixel != 0)
-    secondPixel = targetPixel - 1;
-  else if(pixelRemainder < 0.5 && targetPixel == 0)
-    secondPixel = ringLength - 1;
-  else
-    secondPixel = 0;
-
-  return secondPixel;
 }
 
 // Displays a rainbow on the top and bottom ring.
