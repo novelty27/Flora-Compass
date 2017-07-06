@@ -210,7 +210,6 @@ void setStripColor(uint32_t c, uint8_t wait) {
     strip.setPixelColor(i, c);
     delay(wait);
   }
-  strip.show();
 }
 
 // Points North with a number of pixels with a gradient, slowly turning pixels on and off
@@ -219,9 +218,19 @@ void pointNorth(sensors_event_t mag)
   float trueNorth = findNorthPixel(mag);
   for (int i = 0; i < ringLength; i++)
   {
-    int bv = brightnessValue(trueNorth, i);
-    strip.setPixelColor(topRing[i], strip.Color(bv, bv, bv));
-    strip.setPixelColor(bottomRing[i], strip.Color(bv, bv, bv));
+    float bv = brightnessValue(trueNorth, i)/255.0;
+    if (bv > 0)
+    {
+//    strip.setPixelColor(topRing[i], strip.Color(bv, bv, bv));
+//    strip.setPixelColor(bottomRing[i], strip.Color(bv, bv, bv));
+      strip.setPixelColor(topRing[i], Wheel(((i * 256 / ringLength) & 255), bv));
+      strip.setPixelColor(bottomRing[i], Wheel(((i * 256 / ringLength) & 255), bv));
+    }
+    else
+    {
+      strip.setPixelColor(topRing[i], strip.Color(0, 0, 0));
+      strip.setPixelColor(bottomRing[i], strip.Color(0, 0, 0));
+    }
   }
 
   strip.show();
@@ -277,13 +286,52 @@ void rainbowCycle(uint8_t wait) {
 
   for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
     for(i=0; i< ringLength; i++) {
-          strip.setPixelColor(topRing[i], Wheel((i * 256 / ringLength) & 255));
-    strip.setPixelColor(bottomRing[i], Wheel((i * 256 / ringLength) & 255));
+      strip.setPixelColor(topRing[i], Wheel((i * 256 / ringLength) & 255));
+      strip.setPixelColor(bottomRing[i], Wheel((i * 256 / ringLength) & 255));
     }
     strip.show();
     delay(wait);
   }
 }
+
+// Input a pixel number and a brigthness value.
+// Get that pixel's color scaled to the correct brightness
+// (Reinvented Wheel)
+uint32_t Wheel(byte WheelPos, float bv) {
+  Serial.print("WP: "); Serial.print(WheelPos); Serial.print(" bv: "); Serial.print(bv); Serial.print("\n");
+  WheelPos = 255 - WheelPos;
+  if(WheelPos < 85) {
+    return strip.Color(floor((255 - WheelPos * 3)*bv), 0, floor(WheelPos * 3 * bv));
+  }
+  if(WheelPos < 170) {
+    WheelPos -= 85;
+    return strip.Color(0, floor(WheelPos * 3 * bv), floor((255 - WheelPos * 3) * bv));
+  }
+  WheelPos -= 170;
+  return strip.Color(floor(WheelPos * 3 * bv), floor((255 - WheelPos * 3) * bv), 0);
+}
+//uint32_t Wheel(int pixelNumber, int brightnessValue)
+//{
+//  float max = 255.0;
+//  float scale = brightnessValue/max;
+//  Serial.print("Scale: "); Serial.print(255.0*scale); Serial.print("\n");
+//  if(pixelNumber <= ((ringLength-1)/3.0))
+//  {
+//    int num = (ringLength-pixelNumber-1)/3;
+//    return strip.Color(0, floor(1-(num/5.0)), num*floor(255.0*scale/5.0));
+//  }
+//  else if(pixelNumber <= (2*(ringLength-1)/3.0))
+//    return strip.Color(0, floor(255.0*scale/5.0), 0);
+//
+//  else if(pixelNumber < ringLength-1)
+//    return strip.Color(floor(255.0*scale/5.0), 0, 0);
+//
+//  else
+//  {
+//    int bv = brightnessValue;
+//    return strip.Color(bv, bv, bv);
+//  }
+//}
 
 // From Adafruit
 // Input a value 0 to 255 to get a color value.
